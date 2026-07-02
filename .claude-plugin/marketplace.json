@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "description": "Cognite AI tooling for Virtual Datasets teams",
+    "pluginRoot": "./plugins"
+  },
+  "name": "cognite-vd-tools",
+  "owner": {
+    "email": "devtools@cognite.com",
+    "name": "Cognite"
+  },
+  "plugins": [
+    {
+      "description": "ALPHA | Expert guidance and best-practice enforcement for CDF projects. Covers Data Modeling, Transformations, Functions, Workflows, and DMS queries. Includes naming convention rules, domain-specific specialist skills, and a full-project audit skill (cog-vd-audit) that scans all Toolkit YAML, SQL, and Python files and produces a structured AUDIT_REPORT.md.",
+      "name": "cog-vd-best-practices",
+      "source": "./plugins/cog-vd-best-practices",
+      "stability": "alpha"
+    }
+  ]
+}
