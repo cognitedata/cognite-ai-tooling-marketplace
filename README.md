@@ -23,7 +23,8 @@ Rules:
 ### Claude Code
 
 ```bash
-/plugin add cognitedata/cognite-ai-tooling-marketplace
+/plugin marketplace add cognitedata/cognite-ai-tooling-marketplace
+/plugin install cog-vd-best-practices@cognite-vd-tools
 ```
 
 ### Cursor
