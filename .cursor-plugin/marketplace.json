@@ -2,7 +2,7 @@
   "metadata": {
     "description": "Cognite AI tooling for CDF configuration"
   },
-  "name": "cognite-vd-tools",
+  "name": "cognite-ai-tooling-marketplace",
   "owner": {
     "email": "devtools@cognite.com",
     "name": "Cognite"

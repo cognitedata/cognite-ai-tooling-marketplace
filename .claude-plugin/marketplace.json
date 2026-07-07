@@ -3,7 +3,7 @@
     "description": "Cognite AI tooling for CDF configuration",
     "pluginRoot": "./plugins"
   },
-  "name": "cognite-vd-tools",
+  "name": "cognite-ai-tooling-marketplace",
   "owner": {
     "email": "devtools@cognite.com",
     "name": "Cognite"

@@ -24,7 +24,7 @@ Rules:
 
 ```bash
 /plugin marketplace add cognitedata/cognite-ai-tooling-marketplace
-/plugin install cog-vd-best-practices@cognite-vd-tools
+/plugin install cog-vd-best-practices@cognite-ai-tooling-marketplace
 ```
 
 ### Cursor
