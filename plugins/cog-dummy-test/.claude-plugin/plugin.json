@@ -1,0 +1,9 @@
+{
+  "copyright": "Copyright 2026 Cognite AS",
+  "name": "cog-dummy-test",
+  "description": "Minimal plugin for testing marketplace installation and plugin loading.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Cognite"
+  }
+}

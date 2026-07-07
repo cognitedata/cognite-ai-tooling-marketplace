@@ -1,0 +1,11 @@
+{
+  "name": "cog-dummy-test",
+  "displayName": "Dummy Test Plugin",
+  "description": "Minimal plugin for testing marketplace installation and plugin loading.",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Cognite"
+  },
+  "skills": "skills"
+}

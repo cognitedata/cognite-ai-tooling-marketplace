@@ -2,7 +2,6 @@
   "copyright": "Copyright 2026 Cognite AS",
   "name": "cog-vd-best-practices",
   "description": "Expert guidance and best-practice enforcement for CDF projects. Covers Data Modeling, Transformations, Functions, Workflows, and DMS queries. Includes naming convention rules, domain-specific specialist skills, and a full-project audit skill (cog-vd-audit) that scans all Toolkit YAML, SQL, and Python files and produces a structured AUDIT_REPORT.md.",
-  "stability": "alpha",
   "version": "1.1.0",
   "author": {
     "name": "Cognite"
