@@ -12,8 +12,6 @@ Consolidated defaults from the Cognite docs (`/cdf/dm/dm_reference/dm_limits_and
 | Container properties per `usedFor: node` container | 100 |
 | Container properties per `usedFor: record` container[^usedfor] | 1,000 |
 | Enum values per container property | 32 |
-
-[^usedfor]: `node` and `record` are different resource shapes, not the same container with a different cap ΓÇö `record` containers have no views, constraints, or indexes and are queried directly rather than through the DM API. See `cdf-data-model-structure.md` ΓåÆ *`usedFor` ΓÇö pick the right shape*.
 | View versions per project (total) | 2,000 |
 | View versions per view | 100 |
 | View properties per view (`node`) | 300 |
@@ -24,6 +22,8 @@ Consolidated defaults from the Cognite docs (`/cdf/dm/dm_reference/dm_limits_and
 | Views per data model | 100 |
 | Live instances per project | 5,000,000 |
 | Soft-deleted instances per project | 10,000,000 |
+
+[^usedfor]: `node` and `record` are different resource shapes, not the same container with a different cap ΓÇö `record` containers have no views, constraints, or indexes and are queried directly rather than through the DM API. See `cdf-data-model-structure.md` ΓåÆ *`usedFor` ΓÇö pick the right shape*.
 
 ## Property value size limits
 
