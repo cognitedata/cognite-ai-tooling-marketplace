@@ -1,4 +1,3 @@
-<!-- Copyright 2026 Cognite AS -->
 # CDF Direct Relations & Connections
 
 ## Edges vs Direct Relations
@@ -18,6 +17,40 @@ Use **edges** only when:
 | Recommended default | **Yes** | Only when needed |
 
 Always pair a forward direct relation with a reverse relation so both sides of the relationship are navigable without storing redundant data.
+
+## When to use an edge connection property in a view
+
+When the relationship really does need to be an edge (properties on the link, or unbounded fan-out), expose the other side in the view using an **edge connection property**, not a direct relation. Edge connection properties are declared with:
+
+- **`connectionType`**: `multi_edge_connection` (default) or `single_edge_connection` (for a 1:1 link).
+- **`type`**: the fully qualified `{space, externalId}` of the node that represents the **edge type** (typically kept in a dedicated `types` space — see `cdf-data-model-structure.md`).
+- **`source`**: the view of the node on the *other* end of the edge.
+- **`direction`**: `outwards` (follow edges leaving this node — default) or `inwards` (follow edges pointing at this node).
+- **`edgeSource`** *(optional)*: the view that describes the **edge itself**, only needed when the edge carries properties consumers should read.
+
+```yaml
+# In a Pump view, expose the valves this pump flows to via `flows-to` edges.
+valves:
+  connectionType: multi_edge_connection
+  type:
+    space: types
+    externalId: flows-to
+  source:
+    space: '{{space}}'
+    externalId: Valve
+    version: '{{dm_version}}'
+  direction: outwards
+  # edgeSource: only set when the edge itself has properties
+```
+
+Rules of thumb:
+
+- **`direction: outwards`** matches "this node's out-edges of this type" — the more common case for authoring.
+- **`direction: inwards`** is the edge counterpart of a reverse direct relation: "edges pointing at me". Use it when the source of truth for the edge lives on the other side.
+- **Do not mix an edge connection and a direct relation for the same conceptual link** — pick one. If you need both properties on the link *and* fast direct-relation traversal, model the properties as attributes on the source or target node instead.
+- **`edgeSource` triggers extra reads.** Only include it when consumers actually need the edge's own properties; otherwise leave it off.
+
+For picking between edges and direct relations up front, see the *Edges vs Direct Relations* table above.
 
 ## Direct Relations in Containers
 A `type: direct` property stores a reference to another node. Define with:
@@ -208,6 +241,8 @@ When reviewing or adding relationships, verify:
 11. **No CDM property duplication**: custom containers don't redefine properties available from CDM containers (`CogniteDescribable`, `CogniteSchedulable`, `CogniteSourceable`)
 12. **CDM properties re-sourced correctly**: view properties for CDM concepts (name, description, startTime, etc.) source from CDM containers, not custom containers
 13. **Canonical describable mapping**: if CogniteDescribable properties are re-sourced, verify `aliases` maps to `aliases` and not another container property by mistake
+14. **Edge connections have the right fields**: `multi_edge_connection` / `single_edge_connection` properties declare `connectionType`, `type`, `source`, `direction`, and only include `edgeSource` when the edge itself carries readable properties
+15. **Edge type nodes exist**: the `type` referenced by every edge connection resolves to a real node in the `types` (or equivalent) space and is not accidentally re-used across unrelated edge shapes
 
 ## Checklist for Adding a New Relationship
 1. Add `type: direct` property to the source container

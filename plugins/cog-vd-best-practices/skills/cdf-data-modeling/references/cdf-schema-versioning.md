@@ -1,4 +1,3 @@
-<!-- Copyright 2026 Cognite AS -->
 # Schema changes, view versions, and data model references
 
 Distilled for Toolkit YAML workflows. For **index and btree rules**, use `cdf-data-model-indexes.md` (max **10** btree indexes per `usedFor: node` container).
@@ -30,7 +29,27 @@ Confirm current CDF rules with **`SearchCogniteDocs`** or `cdf build` before adv
 
 ## `requires` / index lifecycle
 
-Adding or changing **`requires`** and **indexes** can be processed asynchronously in CDF. If ingest or queries behave oddly right after a deploy, check instance/constraint state in the API or UI before assuming misconfiguration.
+Adding or changing **`requires`** and **indexes** is processed **asynchronously** in CDF. The create endpoint returns immediately; the actual validation or index build happens in the background against existing data. If ingest or queries behave oddly right after a deploy, check instance/constraint state in the API or UI before assuming misconfiguration.
+
+### Background validation states
+
+Constraints, indexes, and property-level rules (nullability, `maxListSize`, `maxTextSize`) each expose a read-only **`state`** field on the returned container. Three possible values:
+
+- **`current`** — validated / built successfully. Ready for use.
+- **`pending`** — background work is still running. Check back later.
+- **`failed`** — pre-existing data violates the constraint, or blocks the index from building. **Constraints are still enforced on new data even when the state is `failed`** — old rows just aren't validated retroactively, and failed indexes cannot speed up queries.
+
+For property-level constraints (nullability, size bounds) the state fields live under `constraintState` on the property object (`nullability`, `maxListSize`, `maxTextSize`).
+
+### Retrying a failed constraint or index
+
+CDF does not automatically re-validate after `failed`. Once you've cleaned up the offending data, trigger a re-scan explicitly:
+
+- **`indexes/retry`** — retry a failed btree/inverted index build.
+- **`constraints/retry`** — re-validate `requires` or `uniqueness` constraints that had invalid pre-existing data.
+- **`properties/retry`** — re-validate nullability / size-bound constraints on properties that had invalid pre-existing data.
+
+Each of these triggers a full scan against the container's data — **use them sparingly**, especially on large containers.
 
 ## Uniqueness
 

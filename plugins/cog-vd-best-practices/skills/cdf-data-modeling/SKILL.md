@@ -1,5 +1,4 @@
 ---
-# Copyright 2026 Cognite AS
 name: cognite-data-modeling
 description: CDF data model design patterns for containers, views, and CDM/IDM extensions in YAML. Use when creating or modifying data model YAML files, extending CogniteCore or IDM types, designing containers and views, adding indexes or direct relations, auditing data models, or deploying via Cognite Toolkit.
 ---
@@ -9,13 +8,18 @@ description: CDF data model design patterns for containers, views, and CDM/IDM e
 # CDF Data Modeling
 
 Read this skill first for orientation, then read the relevant reference file:
-- `references/cdf-data-model-structure.md` -- containers, views, CDM/IDM extensions, structure conventions, audit checklist
-- `references/cdf-data-model-indexes.md` -- indexing best practices, btree restrictions, reverse relation indexing
-- `references/cdf-direct-relations.md` -- direct relation patterns, reverse relations, source specificity, forward–reverse pairing (REVERSE-009)
-- `references/cdf-schema-versioning.md` -- view version bumps, data model `name` on view refs, container change safety
-- `references/cdf-enterprise-vs-solution.md` -- enterprise vs. solution layering, mapping vs. `implements:`, reverse-relation ownership, consumer tracking
+- `references/cdf-data-model-structure.md` -- containers, views, CDM/IDM extensions, `usedFor`, polymorphism, view filters, native reference types, AI-facing modeling, container sizing + EAV anti-pattern, reserved identifiers, audit checklist
+- `references/cdf-data-model-indexes.md` -- btree vs inverted indexes, default-indexed base properties, btree size bounds, composite index ordering, requires-is-mandatory, cross-links to debug notices
+- `references/cdf-direct-relations.md` -- direct relation patterns, edge connection properties (`single_edge_connection` / `multi_edge_connection`), reverse relations, source specificity, forward–reverse pairing (REVERSE-009)
+- `references/cdf-schema-versioning.md` -- view version bumps, data model `name` on view refs, container change safety, background validation states + retry endpoints
+- `references/cdf-enterprise-vs-solution.md` -- Source / Enterprise / Solution layering with ownership + medallion mapping, two-layer starter, write-back principle, mapping vs. `implements:`, source/enterprise instance-space strategy, access-control (spaces, not data sets), reverse-relation ownership, consumer tracking
+- `references/cdf-data-model-limits.md` -- full defaults table (spaces, containers, properties, views, versions, instances, list/text/json sizes, API concurrency, reserved names)
 
-For querying and fetching data from a model, use the `cognite-data-fetching` skill instead.
+**Related skills in this plugin:**
+- `cognite-dms-queries` — writing efficient DMS `/list`, `/query`, `/search`, and `/sync` queries; debug notices; `/list` sort pitfalls; `hasData` mechanics; latency variability.
+- `cognite-transformation` — SQL transformations that write into data models (uses `is_new(lastUpdatedTime)` as its cursor pattern — see the cross-link note in that skill).
+
+For querying and fetching data from a model, use the `cognite-dms-queries` skill.
 
 ## 1. The Three-Layer Model
 
@@ -66,11 +70,13 @@ constraints:
 ## 4. Key Design Rules
 
 - **One CogniteAsset implementer per data model** — multiple views implementing CogniteAsset breaks CDF UI navigation. This applies *per data model*, not per space: a solution model that needs asset semantics must define **its own** single `CogniteAsset` implementer, not reuse the enterprise one.
-- **Max 100 properties per container** — plan ahead; properties cannot be removed after deployment. Plan overflow strategy (`additionalProperties` JSON, secondary container, separate view) **before** modeling, not after.
+- **Default 100 properties per `usedFor: node` container** (1,000 for `usedFor: record`, which is a *different* resource shape — no views/constraints/indexes, queried directly; see `cdf-data-model-structure.md` → *`usedFor` — pick the right shape*). Plan ahead; properties cannot be removed after deployment. The default can be raised via Cognite Support, but treat it as a design constraint, not a target. Plan overflow strategy (`additionalProperties` JSON, secondary container, separate view) **before** modeling, not after.
 - **Max 10 indexes per container** (`usedFor: node` only) — index strategically (see `cdf-data-model-indexes.md`).
 - **Containers are unversioned and additive** — breaking container changes (property removal, type / `list` / `usedFor` changes) require migration, not a version bump. Views and data models carry the version semantics.
 - **Every direct relation in a view must have a `source` block** — omit only for intentionally polymorphic relations.
-- **Every view property must have a `description`** — unnamed properties are opaque to AI tools and search.
+- **Every view property must have a `description`** — unnamed properties are opaque to AI tools and search. Prefer human-readable identifiers over abbreviations; include an example value when the shape isn't obvious (see AI-facing modeling in `cdf-data-model-structure.md`).
+- **`requires` constraints are mandatory for multi-container views** — without them, the query planner cannot short-circuit the joins triggered by `hasData` filters, and query performance is typically unacceptable at scale.
+- **Never model with EAV (entity-attribute-value).** First-class properties for the fields you filter/sort/index; `json` overflow for everything else. See `cdf-data-model-structure.md` → *Container sizing — wide, narrow, and the EAV anti-pattern*.
 - **Use `{{space}}` and `{{dm_version}}` template variables** — never hardcode space or version values. Use separate version variables per data model (e.g. `dm_enterprise_version`, `dm_search_version`) so they can move independently.
 
 ## 5. IDM Work Management Types
@@ -98,8 +104,13 @@ Before deploying or reviewing a data model:
 - [ ] No container exceeds 100 properties or 10 indexes; overflow strategy (`additionalProperties` etc.) is in place
 - [ ] Every `*.View.yaml` appears in a `*.DataModel.yaml` (no orphaned views)
 - [ ] CDM property containers match the `implements` declaration (no copy-paste mismatch)
+- [ ] Every multi-container view has the `requires` chain it needs so the query planner can short-circuit `hasData` — no missing `requires`
 - [ ] No `requires` constraints added for unrelated containers
 - [ ] `usedFor: record` containers have no `constraints` or `indexes` sections
+- [ ] Frequently-updated fields (counters, `lastViewed`, `lastInspection`) are isolated from heavily-indexed containers
+- [ ] No EAV pattern — data is first-class properties or `json` overflow, not attribute-value node explosions
+- [ ] External IDs, property names, and space names avoid the reserved lists (see [`cdf-data-model-limits.md` → *Reserved values*](references/cdf-data-model-limits.md#reserved-values))
+- [ ] Source and enterprise layers use **separate** instance spaces (or the coupling risk is explicitly documented)
 - [ ] README has a `consumers:` section listing known apps + pinned versions (updated in this PR if a version bumped)
 
 ## 7. Schema, versioning, and validators

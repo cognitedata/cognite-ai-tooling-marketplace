@@ -1,5 +1,4 @@
 ---
-# Copyright 2026 Cognite AS
 name: cognite-transformation
 description: Expert guidance on CDF Transformations. Use when the user is writing, reviewing, or troubleshooting a CDF Transformation SQL query running on the Spark SQL backend, configuring Transformation YAML files for the Cognite Toolkit, working with transformation destinations (nodes, edges, instances, raw, etc.), or auditing an existing transformation for performance, memory, incremental-load, JOIN, DM/delete, or formatting issues.
 ---
@@ -502,6 +501,8 @@ WHERE is_new('{{raw_db}}_{{raw_table}}', lastUpdatedTime)
 ```
 
 To force a full backfill, change the `is_new` name (e.g., append `_v2`).
+
+> **Note on `lastUpdatedTime`:** Using `lastUpdatedTime` as the second argument to `is_new()` is the *correct* pattern for CDF Transformations SQL — it's the cursor argument, not a raw filter. This does **not** contradict the Cognite DMS guidance ("avoid filters on `lastUpdatedTime` in `/list` and `/query` at scale") — that guidance applies to DMS query endpoints, not the transformation service. The `cognite-dms-queries` skill has the query-side rule; this skill (`cognite-transformation`) has the transformation-side pattern. Both are correct in their own layer.
 
 ## Incremental Load — Multiple Joined Tables (use with care)
 
