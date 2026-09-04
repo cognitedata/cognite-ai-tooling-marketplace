@@ -1,4 +1,3 @@
-<!-- Copyright 2026 Cognite AS -->
 # Schema changes, view versions, and data model references
 
 Distilled for Toolkit YAML workflows. For **index and btree rules**, use `cdf-data-model-indexes.md` (max **10** btree indexes per `usedFor: node` container).
@@ -19,22 +18,42 @@ Each list item is a **view reference** only: `space`, `externalId`, `version`, `
 
 ## Containers (long-lived schema)
 
-Containers are **not** versioned like views — they are the **durable contract** between enterprise and solution layers. Treat deployed container schema as **additive** where possible:
+Containers are **not** versioned like views ΓÇö they are the **durable contract** between enterprise and solution layers. Treat deployed container schema as **additive** where possible:
 
-- **Avoid** deleting properties or changing property **type**, **`list`**, **`usedFor`**, or direct-relation target — these are destructive or disallowed paths that require migration (export, delete container, recreate, re-ingest).
+- **Avoid** deleting properties or changing property **type**, **`list`**, **`usedFor`**, or direct-relation target ΓÇö these are destructive or disallowed paths that require migration (export, delete container, recreate, re-ingest).
 - **Safer:** add new properties, adjust **name** / **description**, add nullable fields, add indexes/constraints per current CDF rules (see indexes reference).
 
-Because containers are unversioned, mapping a solution view to an enterprise **container** (`container:` + `containerPropertyIdentifier:`) decouples the solution from enterprise view version churn. Mapping (or `implements:`) to an enterprise **view** re-couples you to that view's lifecycle. See `cdf-enterprise-vs-solution.md` sec.2–sec.3.
+Because containers are unversioned, mapping a solution view to an enterprise **container** (`container:` + `containerPropertyIdentifier:`) decouples the solution from enterprise view version churn. Mapping (or `implements:`) to an enterprise **view** re-couples you to that view's lifecycle. See `cdf-enterprise-vs-solution.md` sec.2ΓÇôsec.3.
 
 Confirm current CDF rules with **`SearchCogniteDocs`** or `cdf build` before advising a specific migration.
 
 ## `requires` / index lifecycle
 
-Adding or changing **`requires`** and **indexes** can be processed asynchronously in CDF. If ingest or queries behave oddly right after a deploy, check instance/constraint state in the API or UI before assuming misconfiguration.
+Adding or changing **`requires`** and **indexes** is processed **asynchronously** in CDF. The create endpoint returns immediately; the actual validation or index build happens in the background against existing data. If ingest or queries behave oddly right after a deploy, check instance/constraint state in the API or UI before assuming misconfiguration.
+
+### Background validation states
+
+Constraints, indexes, and property-level rules (nullability, `maxListSize`, `maxTextSize`) each expose a read-only **`state`** field on the returned container. Three possible values:
+
+- **`current`** ΓÇö validated / built successfully. Ready for use.
+- **`pending`** ΓÇö background work is still running. Check back later.
+- **`failed`** ΓÇö pre-existing data violates the constraint, or blocks the index from building. **Constraints are still enforced on new data even when the state is `failed`** ΓÇö old rows just aren't validated retroactively, and failed indexes cannot speed up queries.
+
+For property-level constraints (nullability, size bounds) the state fields live under `constraintState` on the property object (`nullability`, `maxListSize`, `maxTextSize`).
+
+### Retrying a failed constraint or index
+
+CDF does not automatically re-validate after `failed`. Once you've cleaned up the offending data, trigger a re-scan explicitly:
+
+- **`indexes/retry`** ΓÇö retry a failed btree/inverted index build.
+- **`constraints/retry`** ΓÇö re-validate `requires` or `uniqueness` constraints that had invalid pre-existing data.
+- **`properties/retry`** ΓÇö re-validate nullability / size-bound constraints on properties that had invalid pre-existing data.
+
+Each of these triggers a full scan against the container's data ΓÇö **use them sparingly**, especially on large containers.
 
 ## Uniqueness
 
-Use **`constraintType: uniqueness`** on business keys when one container must enforce a unique combination of scalar properties — in addition to btree indexes used for lookup and filters.
+Use **`constraintType: uniqueness`** on business keys when one container must enforce a unique combination of scalar properties ΓÇö in addition to btree indexes used for lookup and filters.
 
 ## Breaking change patterns
 
@@ -64,8 +83,8 @@ After deleting, recreating, re-ingesting, or creating a parallel container, recr
 | Add new index | No | Yes | Allowed |
 | Delete index | No | Yes | Allowed |
 | Change index | N/A | **No** | Not allowed |
-| Change property: nullable → non-nullable | Yes | Yes | May break ingestion clients |
-| Change property: non-nullable → nullable | N/A | **No** | Not allowed |
+| Change property: nullable ΓåÆ non-nullable | Yes | Yes | May break ingestion clients |
+| Change property: non-nullable ΓåÆ nullable | N/A | **No** | Not allowed |
 | Change property: `autoIncrement` | N/A | **No** | Not allowed |
 | Change property: `defaultValue` | No | Yes | Applies to new values only |
 | Change property: `description` | No | Yes | Metadata only |
