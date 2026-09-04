@@ -1,6 +1,6 @@
-# CDF Data Modeling ΓÇö Limits and Reserved Values
+# CDF Data Modeling — Limits and Reserved Values
 
-Consolidated defaults from the Cognite docs (`/cdf/dm/dm_reference/dm_limits_and_restrictions`). These are **defaults** for a CDF project ΓÇö some can be raised on request via Cognite Support. Use this file as a quick lookup during design and audits; consult the docs if a specific number matters for a decision.
+Consolidated defaults from the Cognite docs (`/cdf/dm/dm_reference/dm_limits_and_restrictions`). These are **defaults** for a CDF project — some can be raised on request via Cognite Support. Use this file as a quick lookup during design and audits; consult the docs if a specific number matters for a decision.
 
 ## Schema and instance limits
 
@@ -23,7 +23,7 @@ Consolidated defaults from the Cognite docs (`/cdf/dm/dm_reference/dm_limits_and
 | Live instances per project | 5,000,000 |
 | Soft-deleted instances per project | 10,000,000 |
 
-[^usedfor]: `node` and `record` are different resource shapes, not the same container with a different cap ΓÇö `record` containers have no views, constraints, or indexes and are queried directly rather than through the DM API. See `cdf-data-model-structure.md` ΓåÆ *`usedFor` ΓÇö pick the right shape*.
+[^usedfor]: `node` and `record` are different resource shapes, not the same container with a different cap — `record` containers have no views, constraints, or indexes and are queried directly rather than through the DM API. See `cdf-data-model-structure.md` → *`usedFor` — pick the right shape*.
 
 ## Property value size limits
 
@@ -36,7 +36,7 @@ Consolidated defaults from the Cognite docs (`/cdf/dm/dm_reference/dm_limits_and
 
 - **Direct relation lists:** default cap 100 items.
 - **Other list types:** default cap 1,000 items.
-- **Customizable via `maxListSize`** ΓÇö you can only *raise* the cap after container creation, never lower it.
+- **Customizable via `maxListSize`** — you can only *raise* the cap after container creation, never lower it.
 - **Absolute maxima for `maxListSize`:**
   - `int32` (with btree index): 600
   - `int64` (with btree index): 300
@@ -62,7 +62,7 @@ Concurrency is applied project-wide, not per client. Excess requests get `429 To
 
 ## Reserved values
 
-Never use these as identifiers ΓÇö CDF rejects them.
+Never use these as identifiers — CDF rejects them.
 
 ### Reserved `externalId` for containers and views
 `Boolean`, `Date`, `File`, `Float`, `Float32`, `Float64`, `Int`, `Int32`, `Int64`, `JSONObject`, `Mutation`, `Numeric`, `PageInfo`, `Query`, `Sequence`, `String`, `Subscription`, `TimeSeries`, `Timestamp`.
@@ -78,7 +78,7 @@ Never use these as identifiers ΓÇö CDF rejects them.
 
 ## Monitoring current usage
 
-- **CDF UI:** Data models ΓåÆ *Storage ΓåÆ See all* to view project-specific limits and current usage.
+- **CDF UI:** Data models → *Storage → See all* to view project-specific limits and current usage.
 - **API:** `datamodels/statistics` (project-wide) and space-scoped `datamodels/statistics` (per space).
 
 ## Raising limits
@@ -88,8 +88,8 @@ Never use these as identifiers ΓÇö CDF rejects them.
   1. Your Cognite Customer Success or Solution Architect contact, if you have one.
   2. Otherwise, a [Cognite Support](https://cognite.zendesk.com/hc/en-us/requests/new) ticket mentioning **"Records / Streams custom capacity"**.
 
-  See the docs' *On-request capacity* section for the upper range Cognite can provision. Request capacity **before** creating a stream ΓÇö per-stream limits are fixed at creation and cannot be raised later.
+  See the docs' *On-request capacity* section for the upper range Cognite can provision. Request capacity **before** creating a stream — per-stream limits are fixed at creation and cannot be raised later.
 
 ## Records and streams (summary)
 
-For projects using records/streams, additional per-stream limits apply. Consult the docs (`/cdf/dm/dm_reference/dm_limits_and_restrictions` ΓåÆ *Records and streams*) for template-specific caps (records per stream, throughput, `lastUpdatedTime` filter interval, retention). This skill does not cover records/stream design in depth.
+For projects using records/streams, additional per-stream limits apply. Consult the docs (`/cdf/dm/dm_reference/dm_limits_and_restrictions` → *Records and streams*) for template-specific caps (records per stream, throughput, `lastUpdatedTime` filter interval, retention). This skill does not cover records/stream design in depth.

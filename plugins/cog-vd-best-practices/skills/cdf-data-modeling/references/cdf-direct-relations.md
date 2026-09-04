@@ -23,9 +23,9 @@ Always pair a forward direct relation with a reverse relation so both sides of t
 When the relationship really does need to be an edge (properties on the link, or unbounded fan-out), expose the other side in the view using an **edge connection property**, not a direct relation. Edge connection properties are declared with:
 
 - **`connectionType`**: `multi_edge_connection` (default) or `single_edge_connection` (for a 1:1 link).
-- **`type`**: the fully qualified `{space, externalId}` of the node that represents the **edge type** (typically kept in a dedicated `types` space ΓÇö see `cdf-data-model-structure.md`).
+- **`type`**: the fully qualified `{space, externalId}` of the node that represents the **edge type** (typically kept in a dedicated `types` space — see `cdf-data-model-structure.md`).
 - **`source`**: the view of the node on the *other* end of the edge.
-- **`direction`**: `outwards` (follow edges leaving this node ΓÇö default) or `inwards` (follow edges pointing at this node).
+- **`direction`**: `outwards` (follow edges leaving this node — default) or `inwards` (follow edges pointing at this node).
 - **`edgeSource`** *(optional)*: the view that describes the **edge itself**, only needed when the edge carries properties consumers should read.
 
 ```yaml
@@ -45,9 +45,9 @@ valves:
 
 Rules of thumb:
 
-- **`direction: outwards`** matches "this node's out-edges of this type" ΓÇö the more common case for authoring.
+- **`direction: outwards`** matches "this node's out-edges of this type" — the more common case for authoring.
 - **`direction: inwards`** is the edge counterpart of a reverse direct relation: "edges pointing at me". Use it when the source of truth for the edge lives on the other side.
-- **Do not mix an edge connection and a direct relation for the same conceptual link** ΓÇö pick one. If you need both properties on the link *and* fast direct-relation traversal, model the properties as attributes on the source or target node instead.
+- **Do not mix an edge connection and a direct relation for the same conceptual link** — pick one. If you need both properties on the link *and* fast direct-relation traversal, model the properties as attributes on the source or target node instead.
 - **`edgeSource` triggers extra reads.** Only include it when consumers actually need the edge's own properties; otherwise leave it off.
 
 For picking between edges and direct relations up front, see the *Edges vs Direct Relations* table above.
@@ -92,9 +92,9 @@ tag:
     type: view
 ```
 
-Omitting `source` makes the relation a raw node reference ΓÇö the UI cannot navigate it as a typed entity. Only omit `source` when the target intentionally has no view.
+Omitting `source` makes the relation a raw node reference — the UI cannot navigate it as a typed entity. Only omit `source` when the target intentionally has no view.
 
-> **Warning ΓÇö Polymorphic relations:** When a direct relation can point to multiple different view types (e.g., `classSpecificProperties` in `Tag.View.yaml` pointing to Pump, Valve, Compressor, etc.), omitting `source` is intentional and correct. Adding a `source` would restrict the relation to a single target view. If you encounter a direct relation without `source` during an audit, verify whether it is polymorphic before flagging it as a violation.
+> **Warning — Polymorphic relations:** When a direct relation can point to multiple different view types (e.g., `classSpecificProperties` in `Tag.View.yaml` pointing to Pump, Valve, Compressor, etc.), omitting `source` is intentional and correct. Adding a `source` would restrict the relation to a single target view. If you encounter a direct relation without `source` during an audit, verify whether it is polymorphic before flagging it as a violation.
 
 **`source` is only valid on `direct` relation properties.** Never add a `source` block to `text`, `int32`, `timestamp`, `boolean`, `json`, or any other non-direct property type. The API will reject it with: _"only direct relation properties can have source defined"_.
 
@@ -126,18 +126,18 @@ Key rules:
 ### Where reverse relations should live
 Reverse relations belong in the model that owns the **forward** relation:
 
-- Forward on a CDM/IDM container or enterprise container (e.g. `CogniteAsset.parent`, `Tag.parent`) ΓåÆ reverse can stay on the enterprise side (e.g. `Tag.children`).
-- Forward on a solution-specific view (e.g. `WorkOrder.assets`, `Notification.asset`, `TimeSeriesData.assets`) ΓåÆ reverse belongs in the solution that defines it, **not** piled onto the enterprise asset/tag view.
+- Forward on a CDM/IDM container or enterprise container (e.g. `CogniteAsset.parent`, `Tag.parent`) → reverse can stay on the enterprise side (e.g. `Tag.children`).
+- Forward on a solution-specific view (e.g. `WorkOrder.assets`, `Notification.asset`, `TimeSeriesData.assets`) → reverse belongs in the solution that defines it, **not** piled onto the enterprise asset/tag view.
 
 Each reverse declared on the enterprise side adds a coupling point: the enterprise model now depends on the solution's forward property name and target view version. See `cdf-enterprise-vs-solution.md` sec.4.
 
-## ForwardΓÇôreverse pairing and anchor view (NEAT-DMS-CONNECTIONS-REVERSE-009)
+## Forward–reverse pairing and anchor view (NEAT-DMS-CONNECTIONS-REVERSE-009)
 
-Validators (e.g. NEAT) expect symmetry: if view **A** declares a reverse through view **B**'s property **`p`**, then property **`p`** on **B** must have `source` pointing to **A** ΓÇö **only when** the container behind **`p`** stores references to instances that are meant to be opened as **A** (same view as the reverse host).
+Validators (e.g. NEAT) expect symmetry: if view **A** declares a reverse through view **B**'s property **`p`**, then property **`p`** on **B** must have `source` pointing to **A** — **only when** the container behind **`p`** stores references to instances that are meant to be opened as **A** (same view as the reverse host).
 
 **Satellite / properties pattern:** A forward property may correctly point at a **child or properties** view (e.g. `FunctionalLocationProperties`) because ingest stores `node_reference` targets for that container. Do **not** change `source` to a **parent** view (e.g. `FunctionalLocation`) just to satisfy a reverse declared on the parent: resolution would treat stored ids as the wrong type. Instead:
 
-- Put the reverse on the view that matches the stored target (**B ΓåÆ satellite**), or
+- Put the reverse on the view that matches the stored target (**B → satellite**), or
 - Add a separate forward property and ingest path that references the parent view if you truly need a reverse on **A**.
 
 **Align `source` with transformations:** For each direct relation, confirm instance load SQL (e.g. `cdf_nodes('...', 'SomeContainer', ...)` and `node_reference`) targets the same logical entity as the property's `source` view. A mismatched `source` (copy-paste from another entity) is a common cause of REVERSE-009 noise.
@@ -163,16 +163,16 @@ When a view property references a container via `container:` + `containerPropert
 3. The `source` view matches the semantic target (e.g., a Notification's `maintenanceOrder` should source to `WorkOrder`, not `WorkOrderOperation`)
 4. The `description` matches the view's context (e.g., "The work order the **notification** is related to", not "the **operation** is related to")
 
-> **Real example caught:** `Notification.View.yaml` had `maintenanceOrder` pointing to container `CogniteOperation` with source `WorkOrderOperation` ΓÇö both wrong. Should have been container `CogniteNotification` with source `WorkOrder`. The description also said "operation" instead of "notification". This was a copy-paste from `WorkOrderOperation.View.yaml`.
+> **Real example caught:** `Notification.View.yaml` had `maintenanceOrder` pointing to container `CogniteOperation` with source `WorkOrderOperation` — both wrong. Should have been container `CogniteNotification` with source `WorkOrder`. The description also said "operation" instead of "notification". This was a copy-paste from `WorkOrderOperation.View.yaml`.
 
 ## Source Specificity (NEAT-DMS-CONNECTIONS-REVERSE-008)
-When a direct relation property's `source` configures a reverse connection in another view, the `source` must point to the **most specific view** in the data model ΓÇö not a CDM ancestor.
+When a direct relation property's `source` configures a reverse connection in another view, the `source` must point to the **most specific view** in the data model — not a CDM ancestor.
 
 **Problem:** A view inherits or defines a direct relation pointing to a CDM type (e.g., `CogniteTimeSeries`), but the data model has a more specific extension (e.g., `HIOTimeSeries`). The reverse relation in the target view references this property via `through.identifier`, but the forward source still points to the ancestor.
 
 **Fix:** Override the property in the view to point `source` to the specific view:
 ```yaml
-# [BAD] BAD ΓÇö inherited source points to CDM ancestor
+# [BAD] BAD — inherited source points to CDM ancestor
 timeSeries:
   container:
     space: cdf_cdm
@@ -185,7 +185,7 @@ timeSeries:
     version: v1
     type: view
 
-# [GOOD] GOOD ΓÇö overridden source points to specific view in the data model
+# [GOOD] GOOD — overridden source points to specific view in the data model
 timeSeries:
   container:
     space: cdf_cdm
@@ -204,7 +204,7 @@ timeSeries:
 > **CDM views are immutable.** If the forward property lives in a `cdf_cdm` view (e.g., `CogniteActivity.equipment`), it cannot be overridden. These produce informational warnings only. Focus on fixing forward properties in your own views.
 
 ## Re-sourcing CDM Properties
-When a view needs a property that already exists in a CDM container (e.g., `description` in `CogniteDescribable`, `scheduledStartTime` in `CogniteSchedulable`), source it from the CDM container ΓÇö never duplicate it in a custom container.
+When a view needs a property that already exists in a CDM container (e.g., `description` in `CogniteDescribable`, `scheduledStartTime` in `CogniteSchedulable`), source it from the CDM container — never duplicate it in a custom container.
 
 The view property can use a different `name` and `description` for domain context while still sourcing from CDM:
 ```yaml
@@ -237,7 +237,7 @@ When reviewing or adding relationships, verify:
 7. **`source` view is semantically correct**: the source view matches the intended target entity
 8. **Description matches context**: description text refers to the correct entity, not a copy-paste from another view
 9. **Source specificity**: direct relation `source` points to the most specific view in the data model, not a CDM ancestor (see NEAT-DMS-CONNECTIONS-REVERSE-008)
-10. **Reverse pairing / anchor view**: reverse on view **A** through **B`.`p`** requires **`p`.`source` ΓåÆ A** only if stored refs resolve as **A**; otherwise move the reverse to the view that matches stored targets, or add a dedicated forward property (see NEAT-DMS-CONNECTIONS-REVERSE-009 section above)
+10. **Reverse pairing / anchor view**: reverse on view **A** through **B`.`p`** requires **`p`.`source` → A** only if stored refs resolve as **A**; otherwise move the reverse to the view that matches stored targets, or add a dedicated forward property (see NEAT-DMS-CONNECTIONS-REVERSE-009 section above)
 11. **No CDM property duplication**: custom containers don't redefine properties available from CDM containers (`CogniteDescribable`, `CogniteSchedulable`, `CogniteSourceable`)
 12. **CDM properties re-sourced correctly**: view properties for CDM concepts (name, description, startTime, etc.) source from CDM containers, not custom containers
 13. **Canonical describable mapping**: if CogniteDescribable properties are re-sourced, verify `aliases` maps to `aliases` and not another container property by mistake
