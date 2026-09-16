@@ -1,6 +1,11 @@
 # Contributing
 
-This repository is published as a **read-only reference**. It contains the `cog-vd-best-practices` plugin for Claude Code and Cursor, maintained by Cognite.
+This repository is published as a **read-only reference**. It contains the `cog-vd-best-practices` plugin for Claude Code, Cursor, and GitHub Copilot, maintained by Cognite.
+
+## Marketplace manifests
+
+- `.claude-plugin/marketplace.json` — read by Claude Code, and also by GitHub Copilot (Copilot accepts this path as an alternative to `.github/plugin/`, so no separate manifest is maintained for it).
+- `.cursor-plugin/marketplace.json` — read by Cursor.
 
 ## This repository does not accept pull requests
 

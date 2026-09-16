@@ -20,14 +20,12 @@ Rules:
 
 ## Installation
 
-### GitHub Copilot CLI
+### GitHub Copilot
 
 ```bash
 copilot plugin marketplace add cognitedata/cognite-ai-tooling-marketplace
 copilot plugin install cog-vd-best-practices@cognite-ai-tooling-marketplace
 ```
-
-Copilot CLI reads the existing `.claude-plugin/marketplace.json` directly, so no separate manifest is needed for this marketplace.
 
 ### Claude Code
 
