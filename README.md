@@ -20,6 +20,13 @@ Rules:
 
 ## Installation
 
+### GitHub Copilot
+
+```bash
+copilot plugin marketplace add cognitedata/cognite-ai-tooling-marketplace
+copilot plugin install cog-vd-best-practices@cognite-ai-tooling-marketplace
+```
+
 ### Claude Code
 
 ```bash
