@@ -1,0 +1,1 @@
+* @cognitedata/library-owners
